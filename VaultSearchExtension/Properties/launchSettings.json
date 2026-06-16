@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "VaultSearchExtension (Package)": {
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": true
+    },
+    "VaultSearchExtension (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
