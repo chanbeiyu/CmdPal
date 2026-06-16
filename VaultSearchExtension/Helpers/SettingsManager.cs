@@ -75,11 +75,8 @@ internal sealed class SettingsManager : JsonSettingsManager, ISettingOptions
         Settings.SettingsChanged += (s, a) =>
         {
             SaveSettings();
-            if (VaultPathSettinged)
-            {
-                ReadOnlySet<VaultEntry> vaultSet = VaultManager.Initialize(this);
-                FileCacheManager.Instance.RebuildIndex(vaultSet, this);
-            }
+            ReadOnlySet<VaultEntry> vaultSet = VaultManager.Initialize(this);
+            FileCacheManager.Instance.RebuildIndex(vaultSet, this);
         };
     }
 

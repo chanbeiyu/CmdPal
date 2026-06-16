@@ -1,4 +1,8 @@
-﻿using EzPinyin;
+﻿using CmdPal.VaultSearchExtension.Helpers;
+using CmdPal.VaultSearchExtension.Indexer.Files;
+using CmdPal.VaultSearchExtension.Indexer.Search;
+using CmdPal.VaultSearchExtension.Indexer.Vaults;
+using EzPinyin;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,15 +12,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using CmdPal.VaultSearchExtension.Helpers;
-using CmdPal.VaultSearchExtension.Indexer.Files;
-using CmdPal.VaultSearchExtension.Indexer.Search;
-using CmdPal.VaultSearchExtension.Indexer.Vaults;
+using Windows.Foundation.Collections;
 
 namespace CmdPal.VaultSearchExtension.Indexer;
 
-internal sealed partial class FileCacheManager : IDisposable
-{
+internal sealed partial class FileCacheManager: IDisposable {
 
     // Cache configuration
     private const int MaxContentPreviewLength = 10240; // 10KB
@@ -41,8 +41,7 @@ internal sealed partial class FileCacheManager : IDisposable
 
     private static readonly Lazy<FileCacheManager> _instance = new(() => new FileCacheManager());
     public static FileCacheManager Instance => _instance.Value;
-    private FileCacheManager()
-    {
+    private FileCacheManager() {
         _watcherManager = new FileWatcherManager(this);
     }
 
@@ -53,12 +52,10 @@ internal sealed partial class FileCacheManager : IDisposable
     public int FileCount => _fileIndex.Count;
     public long InvertedCount => _invertedIndex.Values.Sum(o => o.Count);
 
-    public IndexStateEnum IndexState
-    {
+    public IndexStateEnum IndexState {
         get => _indexState;
-        set
-        {
-            if (_indexState == value) return;
+        set {
+            if(_indexState == value) return;
             IndexStateEnum oldValue = _indexState;
             _indexState = value;
             OnIndexStateChanged(oldValue, value);
@@ -67,23 +64,23 @@ internal sealed partial class FileCacheManager : IDisposable
 
     public event EventHandler<StateChangedEventArgs<IndexStateEnum>>? IndexStateChanged;
 
-    public void OnIndexStateChanged(IndexStateEnum oldValue, IndexStateEnum newValue)
-    {
+    public void OnIndexStateChanged(IndexStateEnum oldValue, IndexStateEnum newValue) {
         IndexStateChanged?.Invoke(this, new StateChangedEventArgs<IndexStateEnum>(oldValue, newValue));
     }
 
-    public void RebuildIndex(ReadOnlySet<VaultEntry> vaultSet, ISettingOptions settingOptions)
-    {
+    public void RebuildIndex(ReadOnlySet<VaultEntry> vaultSet, ISettingOptions settingOptions) {
 
-        if (_indexState.Equals(IndexStateEnum.Running))
-        {
+        if(vaultSet is null || vaultSet.Count == 0) {
+            Clear(); return;
+        }
+
+        if(_indexState.Equals(IndexStateEnum.Running)) {
             LogHelper.Debug($"Building index, cancel this request...");
             return;
         }
 
         _rebuildLock.EnterWriteLock();
-        try
-        {
+        try {
             // Change state to running
             _indexState = IndexStateEnum.Running;
             // 2. Stop the old watchers
@@ -97,17 +94,14 @@ internal sealed partial class FileCacheManager : IDisposable
             // 5. Start new watchers
             _watcherManager?.StartWatching(vaultSet);
             // 6. Change state to completed
-           
-        }
-        finally
-        {
+
+        } finally {
             _indexState = IndexStateEnum.Completed;
             _rebuildLock.ExitWriteLock();
         }
     }
 
-    private void BuildIndex(ReadOnlySet<VaultEntry> vaultSet, ISettingOptions settingOptions)
-    {
+    private void BuildIndex(ReadOnlySet<VaultEntry> vaultSet, ISettingOptions settingOptions) {
 
         LogHelper.Info($"Start building the index, a total of {vaultSet.Count} vaults...");
 
@@ -115,27 +109,22 @@ internal sealed partial class FileCacheManager : IDisposable
         _indexState = IndexStateEnum.Running;
 
         // Phase 1: parallel scan of all vault files
-        Parallel.ForEach(vaultSet, vault =>
-        {
-            var cacheVault = new VaultFile
-            {
+        Parallel.ForEach(vaultSet, vault => {
+            var cacheVault = new VaultFile {
                 VaultName = vault.VaultName,
                 VaultRootPath = vault.VaultRootPath,
                 VaultFiles = []
             };
 
-            try
-            {
+            try {
                 // Recursively scan files
                 var filePaths = FileReaderFactory.FilesRecursive(vault.VaultRootPath);
                 LogHelper.Debug($"[{vault.VaultName}] found {filePaths.Count} files");
 
                 // Process files in parallel
                 var processedCount = 0;
-                Parallel.ForEach(filePaths, filePath =>
-                {
-                    try
-                    {
+                Parallel.ForEach(filePaths, filePath => {
+                    try {
                         var entry = FileReaderFactory.GetReader(filePath).ReadEntry(filePath, vault.VaultName);
                         _fileIndex.TryAdd(filePath, entry);
                         cacheVault.VaultFiles.Add(filePath);
@@ -144,18 +133,14 @@ internal sealed partial class FileCacheManager : IDisposable
                         BuildInvertedIndex(entry);
 
                         var count = Interlocked.Increment(ref processedCount);
-                        if (count % 1000 == 0)
+                        if(count % 1000 == 0)
                             LogHelper.Debug($"[{vault.VaultName}] has processed {count}/{filePaths.Count} files");
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch(Exception ex) {
                         LogHelper.Error($"Failed to process the file [{filePath}]", ex);
                     }
                 });
                 _vaultDictionaries.TryAdd(vault.VaultName, cacheVault);
-            }
-            catch (Exception ex)
-            {
+            } catch(Exception ex) {
                 LogHelper.Error($"Failed to scan warehouse [{vault.VaultName}]", ex);
             }
         });
@@ -168,45 +153,38 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Build inverted index for a single file. Index priority: FileName > Title > Tags > Content
     /// </summary>
-    private void BuildInvertedIndex(FileEntry entry)
-    {
+    private void BuildInvertedIndex(FileEntry entry) {
         // 1. Index file name (highest weight)
         AddTokensToIndex(entry.FileName, entry.FilePath, MatchType.FileName);
 
         // 2. Index title
-        if (!string.IsNullOrWhiteSpace(entry.Title))
+        if(!string.IsNullOrWhiteSpace(entry.Title))
             AddTokensToIndex(entry.Title, entry.FilePath, MatchType.Title);
 
         // 3. Index tags
-        if (entry.Tags != null)
-            foreach (var tag in entry.Tags)
+        if(entry.Tags != null)
+            foreach(var tag in entry.Tags)
                 AddTokensToIndex(tag, entry.FilePath, MatchType.Tags);
 
         // 4. Index content
-        if (!string.IsNullOrWhiteSpace(entry.Content))
+        if(!string.IsNullOrWhiteSpace(entry.Content))
             AddTokensToIndex(entry.Content, entry.FilePath, MatchType.Content);
     }
 
-    private void AddTokensToIndex(string text, string filePath, MatchType matchType)
-    {
+    private void AddTokensToIndex(string text, string filePath, MatchType matchType) {
         var tokens = Tokenize(text);
 
-        foreach (var token in tokens)
-        {
-            var posting = new PostingEntry
-            {
+        foreach(var token in tokens) {
+            var posting = new PostingEntry {
                 FilePath = filePath,
                 MatchType = matchType,
                 MatchPosition = MatchPosition.Substring // default substring match
             };
 
-            _invertedIndex.AddOrUpdate(token, [posting], (key, existingList) =>
-            {
-                lock (existingList)
-                {
+            _invertedIndex.AddOrUpdate(token, [posting], (key, existingList) => {
+                lock(existingList) {
                     // 避免重复添加相同文件的同类型匹配
-                    if (!existingList.Any(p => p.FilePath == filePath && p.MatchType == matchType))
-                    {
+                    if(!existingList.Any(p => p.FilePath == filePath && p.MatchType == matchType)) {
                         existingList.Add(posting);
                     }
                 }
@@ -220,36 +198,30 @@ internal sealed partial class FileCacheManager : IDisposable
     /// Tokenizer: supports splitting Chinese by characters and English by spaces/punctuation.
     /// Also adds initials and full pinyin for Chinese tokens to improve pinyin search.
     /// </summary>
-    private static HashSet<string> Tokenize(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return [];
+    private static HashSet<string> Tokenize(string text) {
+        if(string.IsNullOrWhiteSpace(text)) return [];
 
         // Split: Chinese by characters; English by spaces and punctuation
         var tokens = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // Extract English words and Chinese character groups
         var matches = TokensRegex().Matches(text);
-        foreach (Match match in matches)
-        {
+        foreach(Match match in matches) {
             var token = match.Value.ToLower(CultureInfo.CurrentCulture);
 
-            if (token.Length >= MinTokenLength && token.Length <= MaxTokenLength)
-            {
+            if(token.Length >= MinTokenLength && token.Length <= MaxTokenLength) {
                 tokens.Add(token);
 
                 // For Chinese tokens, additionally add initial pinyin
-                if (token.Any(c => c >= 0x4e00 && c <= 0x9fff))
-                {
+                if(token.Any(c => c >= 0x4e00 && c <= 0x9fff)) {
                     var initials = PinyinHelper.GetInitial(token);
-                    if (initials.Length >= MinTokenLength)
-                    {
+                    if(initials.Length >= MinTokenLength) {
                         tokens.Add(initials);
                     }
 
                     // Add full pinyin
                     var fullPinyin = PinyinHelper.GetPinyin(token);
-                    if (fullPinyin.Length >= MinTokenLength)
-                    {
+                    if(fullPinyin.Length >= MinTokenLength) {
                         tokens.Add(fullPinyin);
                     }
                 }
@@ -263,10 +235,8 @@ internal sealed partial class FileCacheManager : IDisposable
     /// If the input resembles pinyin, perform pinyin lookup as well. Results are sorted by total score
     /// and modification time. Supports filtering by vault and limits results to top items for performance.
     /// </summary>
-    public IReadOnlyList<SearchResult> Search(string query, int skip, int take, string? vaultName = null)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-        {
+    public IReadOnlyList<SearchResult> Search(string query, int skip, int take, string? vaultName = null) {
+        if(string.IsNullOrWhiteSpace(query)) {
             return GetAllFilesSortedByTime(skip, take, vaultName);
         }
 
@@ -279,16 +249,14 @@ internal sealed partial class FileCacheManager : IDisposable
         // 3. Convert to list and filter
         var results = resultScores.Values.ToList();
 
-        if (!string.IsNullOrWhiteSpace(vaultName))
-        {
+        if(!string.IsNullOrWhiteSpace(vaultName)) {
             results = [.. results.Where(r => r.VaultName == vaultName)];
         }
 
         // 4. Sort
-        results.Sort((a, b) =>
-        {
+        results.Sort((a, b) => {
             // Order by total score descending
-            if (a.TotalScore != b.TotalScore)
+            if(a.TotalScore != b.TotalScore)
                 return b.TotalScore.CompareTo(a.TotalScore);
 
             // If scores equal, order by last modified descending
@@ -303,8 +271,7 @@ internal sealed partial class FileCacheManager : IDisposable
     /// </summary>
     /// <param name="vaultName"></param>
     /// <returns></returns>
-    public IReadOnlyList<SearchResult> GetAllFilesSortedByTime(int skip = 0, int take = Int32.MaxValue, string? vaultName = null)
-    {
+    public IReadOnlyList<SearchResult> GetAllFilesSortedByTime(int skip = 0, int take = Int32.MaxValue, string? vaultName = null) {
         var files = string.IsNullOrWhiteSpace(vaultName)
             ? _fileIndex.Values
             : _fileIndex.Values.Where(f => f.VaultName == vaultName);
@@ -330,16 +297,13 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Remove all tag entries for the specified file from the inverted index
     /// </summary>
-    public void RemoveTagsFromIndex(string filePath, string[] tags)
-    {
-        if (tags == null || tags.Length == 0)
+    public void RemoveTagsFromIndex(string filePath, string[] tags) {
+        if(tags == null || tags.Length == 0)
             return;
 
-        foreach (var tag in tags)
-        {
+        foreach(var tag in tags) {
             var tokens = Tokenize(tag);
-            foreach (var token in tokens)
-            {
+            foreach(var token in tokens) {
                 RemovePostingForFile(token, filePath);
             }
         }
@@ -348,13 +312,11 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Add tag entries of the specified file into the inverted index
     /// </summary>
-    public void AddTagsToIndex(string filePath, string[] tags)
-    {
-        if (tags == null || tags.Length == 0)
+    public void AddTagsToIndex(string filePath, string[] tags) {
+        if(tags == null || tags.Length == 0)
             return;
 
-        foreach (var tag in tags)
-        {
+        foreach(var tag in tags) {
             // Reuse tokenizer + indexing logic for Tags
             AddTokensToIndex(tag, filePath, MatchType.Tags);
         }
@@ -363,14 +325,12 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Remove content tokens of the specified file from the inverted index
     /// </summary>
-    public void RemoveContentFromIndex(string filePath, string content)
-    {
-        if (string.IsNullOrWhiteSpace(content))
+    public void RemoveContentFromIndex(string filePath, string content) {
+        if(string.IsNullOrWhiteSpace(content))
             return;
 
         var tokens = Tokenize(content);
-        foreach (var token in tokens)
-        {
+        foreach(var token in tokens) {
             RemovePostingForFile(token, filePath);
         }
     }
@@ -378,9 +338,8 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Add content tokens of the specified file into the inverted index
     /// </summary>
-    public void AddContentToIndex(string filePath, string content)
-    {
-        if (string.IsNullOrWhiteSpace(content))
+    public void AddContentToIndex(string filePath, string content) {
+        if(string.IsNullOrWhiteSpace(content))
             return;
 
         // 复用已有的分词+索引逻辑，类型为 Content
@@ -391,20 +350,17 @@ internal sealed partial class FileCacheManager : IDisposable
     /// Remove all PostingEntry entries under a token that point to the specified file.
     /// If the list becomes empty, remove the key to save memory.
     /// </summary>
-    public void RemovePostingForFile(string token, string filePath)
-    {
-        if (!_invertedIndex.TryGetValue(token, out var postings))
+    public void RemovePostingForFile(string token, string filePath) {
+        if(!_invertedIndex.TryGetValue(token, out var postings))
             return;
 
         // Since multiple threads may run concurrently, lock the list for safety
-        lock (postings)
-        {
+        lock(postings) {
             // Remove all entries that match the file path
             postings.RemoveAll(p => p.FilePath == filePath);
 
             // If the list is empty, consider removing the key to reduce memory usage
-            if (postings.Count == 0)
-            {
+            if(postings.Count == 0) {
                 // Note: _invertedIndex.TryRemove may fail if another thread added new entries; this is safe
                 _invertedIndex.TryRemove(token, out _);
             }
@@ -415,10 +371,8 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Index update: when a file is modified or added, reprocess it and update the index and vault file list
     /// </summary>
-    public void AddOrUpdateFile(string filePath, string vaultName)
-    {
-        try
-        {
+    public void AddOrUpdateFile(string filePath, string vaultName) {
+        try {
             // Remove old index
             RemoveFile(filePath);
 
@@ -427,16 +381,12 @@ internal sealed partial class FileCacheManager : IDisposable
             _fileIndex.TryAdd(filePath, entry);
             BuildInvertedIndex(entry);
 
-            if (_vaultDictionaries.TryGetValue(vaultName, out var repo))
-            {
-                lock (repo.VaultFiles)
-                {
+            if(_vaultDictionaries.TryGetValue(vaultName, out var repo)) {
+                lock(repo.VaultFiles) {
                     repo.VaultFiles.Add(filePath);
                 }
             }
-        }
-        catch (Exception ex)
-        {
+        } catch(Exception ex) {
             LogHelper.Error($"Failed to update file index in [{filePath}]:", ex);
         }
     }
@@ -445,28 +395,21 @@ internal sealed partial class FileCacheManager : IDisposable
     /// Update index: when a file is deleted, remove its related entries from the index and update the vault file list
     /// </summary>
     /// <param name="filePath"></param>
-    public void RemoveFile(string filePath)
-    {
-        if (_fileIndex.TryRemove(filePath, out var entry))
-        {
+    public void RemoveFile(string filePath) {
+        if(_fileIndex.TryRemove(filePath, out var entry)) {
             // Remove from inverted index (simplified; a full cleanup may be performed in background)
-            foreach (var token in Tokenize(entry.FileName + entry.Title +
-                string.Join(" ", entry.Tags ?? [])))
-            {
-                if (_invertedIndex.TryGetValue(token, out var postings))
-                {
-                    lock (postings)
-                    {
+            foreach(var token in Tokenize(entry.FileName + entry.Title +
+                string.Join(" ", entry.Tags ?? []))) {
+                if(_invertedIndex.TryGetValue(token, out var postings)) {
+                    lock(postings) {
                         postings.RemoveAll(p => p.FilePath == filePath);
                     }
                 }
             }
 
             // Remove from vault file list
-            if (_vaultDictionaries.TryGetValue(entry.VaultName, out var repo))
-            {
-                lock (repo.VaultFiles)
-                {
+            if(_vaultDictionaries.TryGetValue(entry.VaultName, out var repo)) {
+                lock(repo.VaultFiles) {
                     repo.VaultFiles.Remove(filePath);
                 }
             }
@@ -478,17 +421,13 @@ internal sealed partial class FileCacheManager : IDisposable
     /// Search for a single word, query in the order of exact match, prefix match, 
     /// and substring match, and calculate scores based on match type and position, updating the result set
     /// </summary>
-    private void SearchToken(string token, ConcurrentDictionary<string, SearchResult> results)
-    {
+    private void SearchToken(string token, ConcurrentDictionary<string, SearchResult> results) {
         var lowerToken = token.ToLower(CultureInfo.CurrentCulture);
 
         // Strategy 1: Exact Match
-        if (_invertedIndex.TryGetValue(lowerToken, out var exactMatches))
-        {
-            foreach (var posting in exactMatches)
-            {
-                if (_fileIndex.TryGetValue(posting.FilePath, out var fileEntry))
-                {
+        if(_invertedIndex.TryGetValue(lowerToken, out var exactMatches)) {
+            foreach(var posting in exactMatches) {
+                if(_fileIndex.TryGetValue(posting.FilePath, out var fileEntry)) {
                     var score = CalculateScore(posting.MatchType, MatchPosition.Exact);
                     UpdateResult(results, fileEntry, posting.MatchType, lowerToken, score);
                 }
@@ -496,16 +435,13 @@ internal sealed partial class FileCacheManager : IDisposable
         }
 
         // Strategy 2: Prefix Matching (if word length >= 2)
-        if (lowerToken.Length >= 2)
-        {
+        if(lowerToken.Length >= 2) {
             var prefixMatches = _invertedIndex
                 .Where(kvp => kvp.Key.StartsWith(lowerToken, StringComparison.OrdinalIgnoreCase))
                 .SelectMany(kvp => kvp.Value);
 
-            foreach (var posting in prefixMatches)
-            {
-                if (_fileIndex.TryGetValue(posting.FilePath, out var fileEntry))
-                {
+            foreach(var posting in prefixMatches) {
+                if(_fileIndex.TryGetValue(posting.FilePath, out var fileEntry)) {
                     var score = CalculateScore(posting.MatchType, MatchPosition.Prefix);
                     UpdateResult(results, fileEntry, posting.MatchType, lowerToken, score);
                 }
@@ -514,16 +450,13 @@ internal sealed partial class FileCacheManager : IDisposable
 
         // Strategy 3: Substring Matching (Only When Exact Match Is Not Found)
         var hasResults = !results.IsEmpty;
-        if (!hasResults && lowerToken.Length >= 2)
-        {
+        if(!hasResults && lowerToken.Length >= 2) {
             var substringMatches = _invertedIndex
                 .Where(kvp => kvp.Key.Contains(lowerToken))
                 .SelectMany(kvp => kvp.Value);
 
-            foreach (var posting in substringMatches)
-            {
-                if (_fileIndex.TryGetValue(posting.FilePath, out var fileEntry))
-                {
+            foreach(var posting in substringMatches) {
+                if(_fileIndex.TryGetValue(posting.FilePath, out var fileEntry)) {
                     var score = CalculateScore(posting.MatchType, MatchPosition.Substring);
                     UpdateResult(results, fileEntry, posting.MatchType, lowerToken, score);
                 }
@@ -534,8 +467,7 @@ internal sealed partial class FileCacheManager : IDisposable
     /// <summary>
     /// Calculate the match score
     /// </summary>
-    private static int CalculateScore(MatchType type, MatchPosition position)
-    {
+    private static int CalculateScore(MatchType type, MatchPosition position) {
         return (int)type + (int)position;
     }
 
@@ -544,10 +476,8 @@ internal sealed partial class FileCacheManager : IDisposable
     /// If the result already exists, add to the score and match details; 
     /// otherwise, create a new result.
     /// </summary>
-    private static void UpdateResult(ConcurrentDictionary<string, SearchResult> results, FileEntry fileEntry, MatchType matchType, string matchedWord, int score)
-    {
-        results.AddOrUpdate(fileEntry.FilePath, new SearchResult
-        {
+    private static void UpdateResult(ConcurrentDictionary<string, SearchResult> results, FileEntry fileEntry, MatchType matchType, string matchedWord, int score) {
+        results.AddOrUpdate(fileEntry.FilePath, new SearchResult {
             FilePath = fileEntry.FilePath,
             VaultName = fileEntry.VaultName,
             FileName = fileEntry.FileName,
@@ -560,22 +490,32 @@ internal sealed partial class FileCacheManager : IDisposable
             TotalScore = score,
             MatchDetails = [(matchedWord, matchType, score)]
         },
-        (key, existing) =>
-        {
+        (key, existing) => {
             existing.TotalScore += score;
             existing.MatchDetails.Add((matchedWord, matchType, score));
             return existing;
         });
     }
 
-    public void Dispose()
-    {
-        _indexState = IndexStateEnum.Pending;
-        _invertedIndex.Clear();
-        _fileIndex.Clear();
-        _vaultDictionaries.Clear();
+    private void Clear() {
+        _rebuildLock.EnterWriteLock();
+        try {
+            // Change state to running
+            _indexState = IndexStateEnum.Pending;
+            // 2. Stop the old watchers
+            _watcherManager?.StopWatching();
+            // 3. Clear all old data
+            _invertedIndex.Clear();
+            _fileIndex.Clear();
+            _vaultDictionaries.Clear();
+        } finally {
+            _rebuildLock.ExitWriteLock();
+        }
         _indexLock?.Dispose();
-        _watcherManager?.Dispose();
+    }
+
+    public void Dispose() {
+        Clear();
     }
 }
 
