@@ -61,7 +61,7 @@ namespace CmdPal.VaultSearchExtension.Properties {
         }
         
         /// <summary>
-        ///   查找类似 拷贝 的本地化字符串。
+        ///   查找类似 Copy 的本地化字符串。
         /// </summary>
         internal static string action_copy {
             get {
@@ -70,7 +70,7 @@ namespace CmdPal.VaultSearchExtension.Properties {
         }
         
         /// <summary>
-        ///   查找类似 拷贝内容 的本地化字符串。
+        ///   查找类似 Copy Content 的本地化字符串。
         /// </summary>
         internal static string action_copy_content {
             get {
@@ -79,7 +79,7 @@ namespace CmdPal.VaultSearchExtension.Properties {
         }
         
         /// <summary>
-        ///   查找类似 拷贝路径 的本地化字符串。
+        ///   查找类似 Copy Path 的本地化字符串。
         /// </summary>
         internal static string action_copy_path {
             get {
@@ -88,7 +88,7 @@ namespace CmdPal.VaultSearchExtension.Properties {
         }
         
         /// <summary>
-        ///   查找类似 拷贝到剪切板 的本地化字符串。
+        ///   查找类似 Copied To Clipboard 的本地化字符串。
         /// </summary>
         internal static string action_copy_toast {
             get {
@@ -97,7 +97,7 @@ namespace CmdPal.VaultSearchExtension.Properties {
         }
         
         /// <summary>
-        ///   查找类似 打开 的本地化字符串。
+        ///   查找类似 Open 的本地化字符串。
         /// </summary>
         internal static string action_open {
             get {

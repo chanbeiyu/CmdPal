@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <RootNamespace>CmdPal.VaultSearchExtension</RootNamespace>
@@ -14,18 +14,18 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
 
-	<DefaultLanguage>zh-Hans</DefaultLanguage>
-	<ApplicationIcon>Assets\logo.ico</ApplicationIcon>
-	<PlatformTarget>AnyCPU</PlatformTarget>
-	<PackageIcon>StoreLogo.scale-400.png</PackageIcon>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<RepositoryUrl>https://github.com/chanbeiyu/CmdPal</RepositoryUrl>
-	<PackageProjectUrl>https://github.com/chanbeiyu/CmdPal</PackageProjectUrl>
-	<PackageTags>vault; search; obsidian; markdown; file search</PackageTags>
-	<NeutralLanguage>zh-Hans</NeutralLanguage>
-	<AppxPackageIdentityName>chanbeiyu.VaultSearch</AppxPackageIdentityName>
-	<AppxPackagePublisher>CN=chanbeiyu</AppxPackagePublisher>
-	<AppxPackageVersion>0.0.1.0</AppxPackageVersion>
+	  <DefaultLanguage>zh-CN</DefaultLanguage>
+	  <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	  <PackageIcon>StoreLogo.scale-400.png</PackageIcon>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryUrl>https://github.com/chanbeiyu/CmdPal</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/chanbeiyu/CmdPal</PackageProjectUrl>
+	  <PackageTags>vault; search; obsidian; markdown; file search</PackageTags>
+	  <NeutralLanguage>zh-Hans</NeutralLanguage>
+	  <AppxPackageIdentityName>chanbeiyu.VaultSearch</AppxPackageIdentityName>
+	  <AppxPackagePublisher>CN=chanbeiyu</AppxPackagePublisher>
+	  <AppxPackageVersion>0.0.1.0</AppxPackageVersion>
   </PropertyGroup>
 	
   <ItemGroup>
@@ -91,6 +91,9 @@
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resource.en-US.resx">
+      <DependentUpon>Resource.resx</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resource.zh-CN.resx">
       <DependentUpon>Resource.resx</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
