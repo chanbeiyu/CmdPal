@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /VaultSearchExtension/VaultSearchExtension_0.0.1.0_x64.cer
+/VaultSearchExtension/Properties/config/appsettings.Prod.json
