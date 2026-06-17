@@ -6,7 +6,6 @@ using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace CmdPal.VaultSearchExtension.Pages;
 

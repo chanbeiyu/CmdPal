@@ -1,7 +1,6 @@
 ﻿namespace CmdPal.VaultSearchExtension.Indexer.Vaults;
 
-internal enum VaultTypeEnum
-{
+internal enum VaultTypeEnum {
 
     Obsidian,
     Folder

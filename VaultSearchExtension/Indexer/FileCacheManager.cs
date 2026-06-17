@@ -12,7 +12,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.Foundation.Collections;
 
 namespace CmdPal.VaultSearchExtension.Indexer;
 

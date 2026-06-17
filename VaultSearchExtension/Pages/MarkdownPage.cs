@@ -1,16 +1,14 @@
-﻿using Microsoft.CommandPalette.Extensions;
-using Microsoft.CommandPalette.Extensions.Toolkit;
-using CmdPal.VaultSearchExtension.Indexer.Search;
+﻿using CmdPal.VaultSearchExtension.Indexer.Search;
 using CmdPal.VaultSearchExtension.Properties;
+using Microsoft.CommandPalette.Extensions;
+using Microsoft.CommandPalette.Extensions.Toolkit;
 
 namespace CmdPal.VaultSearchExtension.Pages;
 
-internal sealed partial class MarkdownPage : ContentPage
-{
+internal sealed partial class MarkdownPage: ContentPage {
     private readonly string _content;
 
-    public MarkdownPage(SearchResult result, string content)
-    {
+    public MarkdownPage(SearchResult result, string content) {
         Id = Resource.page_markdown_id;
         Name = Resource.page_markdown_title;
         Title = result.DisplayTitle;
@@ -18,8 +16,7 @@ internal sealed partial class MarkdownPage : ContentPage
         _content = content;
     }
 
-    public override IContent[] GetContent()
-    {
+    public override IContent[] GetContent() {
         return [
             new MarkdownContent(_content),
         ];

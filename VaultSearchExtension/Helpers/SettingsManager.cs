@@ -1,14 +1,13 @@
-using Microsoft.CommandPalette.Extensions.Toolkit;
-using System.Collections.ObjectModel;
-using System.IO;
 using CmdPal.VaultSearchExtension.Indexer;
 using CmdPal.VaultSearchExtension.Indexer.Vaults;
 using CmdPal.VaultSearchExtension.Properties;
+using Microsoft.CommandPalette.Extensions.Toolkit;
+using System.Collections.ObjectModel;
+using System.IO;
 
 namespace CmdPal.VaultSearchExtension.Helpers;
 
-internal sealed class SettingsManager : JsonSettingsManager, ISettingOptions
-{
+internal sealed class SettingsManager: JsonSettingsManager, ISettingOptions {
     private static readonly string _namespace = "vault.search";
     private static string Namespaced(string propertyName) => $"{_namespace}.{propertyName}";
     private readonly static string vaultPathNamespaed = Namespaced(nameof(VaultPath));
@@ -52,8 +51,7 @@ internal sealed class SettingsManager : JsonSettingsManager, ISettingOptions
     public bool EnableContentIndex => _enableContentIndex.Value;
     public bool EnableShowDetails => _enableShowDetails.Value;
     public bool EnableObsidianVault => _enableObsidianVault.Value;
-    internal static string SettingsJsonPath()
-    {
+    internal static string SettingsJsonPath() {
         var directory = Utilities.BaseSettingsPath("Microsoft.CmdPal");
         Directory.CreateDirectory(directory);
         return Path.Combine(directory, $"{_namespace}.settings.json");
@@ -61,8 +59,7 @@ internal sealed class SettingsManager : JsonSettingsManager, ISettingOptions
 
     public bool VaultPathSettinged => !string.IsNullOrWhiteSpace(VaultPath) || EnableObsidianVault;
 
-    public SettingsManager()
-    {
+    public SettingsManager() {
         FilePath = SettingsJsonPath();
 
         Settings.Add(_vaultPath);
@@ -72,16 +69,14 @@ internal sealed class SettingsManager : JsonSettingsManager, ISettingOptions
         Settings.Add(_enableShowDetails);
         LoadSettings();
 
-        Settings.SettingsChanged += (s, a) =>
-        {
+        Settings.SettingsChanged += (s, a) => {
             SaveSettings();
             ReadOnlySet<VaultEntry> vaultSet = VaultManager.Initialize(this);
             FileCacheManager.Instance.RebuildIndex(vaultSet, this);
         };
     }
 
-    public override string ToString()
-    {
+    public override string ToString() {
         return $"{{{nameof(VaultPath)}={VaultPath}, {nameof(EnableTagsIndex)}={EnableTagsIndex}, {nameof(EnableContentIndex)}={EnableContentIndex.ToString()}, {nameof(EnableShowDetails)}={EnableShowDetails}, {nameof(EnableObsidianVault)}={EnableObsidianVault}, {nameof(VaultPathSettinged)}={VaultPathSettinged.ToString()}, {nameof(Settings)}={Settings}, {nameof(FilePath)}={FilePath}}}";
     }
 }

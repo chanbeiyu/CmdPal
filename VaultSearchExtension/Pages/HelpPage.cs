@@ -1,21 +1,18 @@
-﻿using Microsoft.CommandPalette.Extensions;
+﻿using CmdPal.VaultSearchExtension.Properties;
+using Microsoft.CommandPalette.Extensions;
 using Microsoft.CommandPalette.Extensions.Toolkit;
-using CmdPal.VaultSearchExtension.Properties;
 
 namespace CmdPal.VaultSearchExtension.Pages;
 
-internal sealed partial class HelpPage : ContentPage
-{
-    public HelpPage()
-    {
+internal sealed partial class HelpPage: ContentPage {
+    public HelpPage() {
         Id = Resource.page_help_id;
         Name = Resource.page_help_title;
         Title = Resource.page_help_title;
         Icon = Icons.Help;
     }
 
-    public override IContent[] GetContent()
-    {
+    public override IContent[] GetContent() {
         return [
             new MarkdownContent("## 主要功能"),
             new MarkdownContent("- 自动识别 Obsidian Vault"),

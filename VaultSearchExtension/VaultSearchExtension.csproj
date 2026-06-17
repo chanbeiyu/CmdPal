@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <RootNamespace>CmdPal.VaultSearchExtension</RootNamespace>
-	<ApplicationManifest>app.manifest</ApplicationManifest>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
     
     <WindowsSdkPackageVersion>10.0.26100.68-preview</WindowsSdkPackageVersion>
     <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>

@@ -12,10 +12,8 @@ using Windows.System;
 
 namespace CmdPal.VaultSearchExtension.Pages;
 
-internal sealed partial class FileListItem : ListItem
-{
-    public FileListItem(SearchResult result)
-    {
+internal sealed partial class FileListItem: ListItem {
+    public FileListItem(SearchResult result) {
         Title = result.FileName;
         Subtitle = result.FilePath;
         Icon = Icons.GetFile(result.Extension);
@@ -24,8 +22,7 @@ internal sealed partial class FileListItem : ListItem
         Command = new MarkdownPage(result, content.Value);
         MoreCommands = BuildMoreCommands(result, content.Value);
 
-        Details = new Details
-        {
+        Details = new Details {
             Title = result.DisplayTitle,
             Size = ContentSize.Medium,
             Metadata = BuildDetailsElement(result),
