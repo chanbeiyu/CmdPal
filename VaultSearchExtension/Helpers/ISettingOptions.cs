@@ -1,7 +1,6 @@
 ﻿namespace CmdPal.VaultSearchExtension.Helpers;
 
-internal interface ISettingOptions
-{
+internal interface ISettingOptions {
     string VaultPath { get; }
     bool EnableTagsIndex { get; }
     bool EnableContentIndex { get; }

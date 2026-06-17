@@ -2,8 +2,7 @@
 
 internal struct FileEntry(int id, string filePath, string vaultName, string fileName,
                  string extension, string title, string[] tags, long length, long lastModifiedTicks,
-                 string contentPreview)
-{
+                 string contentPreview) {
     internal int Id = id;
     internal string FilePath = filePath;
     internal string VaultName = vaultName;
@@ -15,8 +14,7 @@ internal struct FileEntry(int id, string filePath, string vaultName, string file
     internal long LastModifiedTicks = lastModifiedTicks;
     internal string Content = contentPreview;
 
-    public override readonly string ToString()
-    {
+    public override readonly string ToString() {
         return $"Id={Id}, VaultName={VaultName}, Title={Title}, Tags={Tags}, FileName={FileName}, Extension={Extension}, FilePath={FilePath}";
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
@@ -10,7 +10,7 @@
 
 	<Identity
 	  Name="chanbeiyu.VaultSearch"
-	  Publisher="CN=chanbeiyu"
+	  Publisher="CN=5CCEDEB7-DC9D-48ED-A8CC-D148D184B5F2"
 	  Version="0.0.1.0" />
 	<!-- When you're ready to publish your extension, you'll need to change the
        Publisher= to match your own identity -->

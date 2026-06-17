@@ -24,7 +24,6 @@ param(
 
 # ---------- 1. 日志初始化（与脚本同目录） ----------
 $now = Get-Date -Format "yyyy-MM-dd"
-
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Get-Location }
 $logFile = Join-Path $scriptDir "$now.log"
 "" | Out-File $logFile -Encoding utf8
@@ -81,6 +80,23 @@ function Merge-JsonObject {
     return $result
 }
 
+# 辅助：以 UTF-8 无 BOM 保存 XmlDocument
+function Save-XmlNoBom {
+    param(
+        [Parameter(Mandatory)] [xml]$XmlDoc,
+        [Parameter(Mandatory)] [string]$Path
+    )
+    $settings = New-Object System.Xml.XmlWriterSettings
+    $settings.Indent = $true
+    $settings.Encoding = New-Object System.Text.UTF8Encoding($false)  # 无 BOM
+    $writer = [System.Xml.XmlWriter]::Create($Path, $settings)
+    try {
+        $XmlDoc.Save($writer)
+    } finally {
+        $writer.Close()
+    }
+}
+
 # ---------- 3. 加载配置逻辑 ----------
 $baseJsonPath = Join-Path $scriptDir "Properties/config/appsettings.json"
 $envJsonPath = Join-Path $scriptDir "Properties/config/appsettings.$Env.json"
@@ -115,6 +131,7 @@ $publisherDisplayName = $finalConfig.PublisherDisplayName
 $cert = $finalConfig.Cert
 $password = $finalConfig.Password
 $path = $finalConfig.Path
+$writerType = $finalConfig.WriterType
 
 # ---------- 4. 配置信息输出 ----------
 Write-Log "==================== 当前构建环境：$Env ===================="
@@ -126,6 +143,7 @@ Write-Log "======> 发布者显示名称：$publisherDisplayName"
 Write-Log "======> 证书文件位置：$cert"
 Write-Log "======> 证书签名密码：$password"
 Write-Log "======> 打包输出位置：$path"
+Write-Log "======> 参数修改方式：$writerType"
 
 
 # ---------- 5. 预处理：替换 .csproj 和 .appxmanifest 中的元数据 ----------
@@ -133,20 +151,35 @@ Write-Log "======> 打包输出位置：$path"
 Write-Log "开始替换项目元数据..."
 
 # ---------- 5.1. 替换 VaultSearchExtension.csproj ----------
-$csprojPath = "./VaultSearchExtension.csproj"
+$csprojPath = Join-Path $scriptDir "VaultSearchExtension.csproj"
 if (Test-Path $csprojPath) {
     Write-Log "更新 $csprojPath（使用 XML API）..."
     try {
-        [xml]$csprojXml = Get-Content $csprojPath -Raw -Encoding utf8
-        # 找到包含目标元素的 PropertyGroup
-        $pg = $csprojXml.Project.PropertyGroup | Where-Object { $_.AppxPackageIdentityName -or $_.AppxPackagePublisher -or $_.AppxPackageVersion } | Select-Object -First 1
-        if (-not $pg) { $pg = $csprojXml.Project.PropertyGroup[0] }
+        if($writerType -ieq "xml") {
+            # ---------- xml 方式 ----------
+            [xml]$csprojXml = Get-Content $csprojPath -Raw -Encoding utf8
+            # 找到包含目标元素的 PropertyGroup
+            $pg = $csprojXml.Project.PropertyGroup | Where-Object { $_.AppxPackageIdentityName -or $_.AppxPackagePublisher -or $_.AppxPackageVersion } | Select-Object -First 1
+            if (-not $pg) { $pg = $csprojXml.Project.PropertyGroup[0] }
+            $pg.AppxPackageIdentityName = $identityName
+            $pg.AppxPackagePublisher = $identityPublisher
+            $pg.AppxPackageVersion = $version
+            Save-XmlNoBom -XmlDoc $csprojXml -Path $csprojPath
+        } else {
+            # ---------- 字符串替换方式 ----------
+            $csprojContent = Get-Content $csprojPath -Raw
+            $csprojContent = $csprojContent -replace `
+                '<AppxPackageIdentityName>.*?</AppxPackageIdentityName>',
+                "<AppxPackageIdentityName>$identityName</AppxPackageIdentityName>"
+            $csprojContent = $csprojContent -replace `
+                '<AppxPackagePublisher>.*?</AppxPackagePublisher>',
+                "<AppxPackagePublisher>$identityPublisher</AppxPackagePublisher>"
+            $csprojContent = $csprojContent -replace `
+                '<AppxPackageVersion>[\d\.]+</AppxPackageVersion>',
+                "<AppxPackageVersion>$version</AppxPackageVersion>"
+            $csprojContent | Out-File $csprojPath -NoNewline -Encoding utf8
+        }
 
-        $pg.AppxPackageIdentityName = $identityName
-        $pg.AppxPackagePublisher = $identityPublisher
-        $pg.AppxPackageVersion = $version
-
-        $csprojXml.Save($csprojPath)
         Write-Log " .csproj 修改完成（XML）"
     } catch {
         Write-Log "替换 .csproj 失败: $_"
@@ -157,20 +190,44 @@ if (Test-Path $csprojPath) {
 }
 
 # ---------- 5.2. 替换 Package.appxmanifest ----------
-$manifestPath = "./Package.appxmanifest"
+$manifestPath = Join-Path $scriptDir "Package.appxmanifest"
 if (Test-Path $manifestPath) {
     Write-Log "更新 $manifestPath ..."
     try {
-        [xml]$manifestXml = Get-Content $manifestPath -Encoding utf8
-        $identityNode = $manifestXml.SelectSingleNode("/*/*[local-name()='Identity']")
-        if ($identityNode) {
-            $identityNode.SetAttribute("Name", $identityName)
-            $identityNode.SetAttribute("Publisher", $identityPublisher)
-            $identityNode.SetAttribute("Version", $version)
+
+        if($writerType -ieq "xml") {
+            # ---------- xml 方式 ----------
+            [xml]$manifestXml = Get-Content $manifestPath -Raw -Encoding utf8
+            $identityNode = $manifestXml.SelectSingleNode("/*/*[local-name()='Identity']")
+            if ($identityNode) {
+                $identityNode.SetAttribute("Name", $identityName)
+                $identityNode.SetAttribute("Publisher", $identityPublisher)
+                $identityNode.SetAttribute("Version", $version)
+            }
+            $pdn = $manifestXml.SelectSingleNode("//PublisherDisplayName")
+            if ($pdn) { $pdn.InnerText = $publisherDisplayName }
+            Save-XmlNoBom -XmlDoc $manifestXml -Path $manifestPath
+        } else {
+            # ---------- 字符串替换方式 ----------
+            $manifestContent = Get-Content $manifestPath -Raw
+            # 替换 Identity 元素的 Name, Publisher, Version
+            $manifestContent = $manifestContent -replace `
+                '(Identity[^>]+?)Name="[^"]*"',
+                "`$1Name=`"$identityName`""
+            $manifestContent = $manifestContent -replace `
+                '(Identity[^>]+?)Publisher="[^"]*"',
+                "`$1Publisher=`"$identityPublisher`""
+            $manifestContent = $manifestContent -replace `
+                '(Identity[^>]+?)Version="[\d\.]+"',
+                "`$1Version=`"$version`""
+            if ($manifestContent -match '<PublisherDisplayName>[^<]*</PublisherDisplayName>') {
+                $manifestContent = $manifestContent -replace `
+                    '<PublisherDisplayName>[^<]*</PublisherDisplayName>',
+                    "<PublisherDisplayName>$publisherDisplayName</PublisherDisplayName>"
+            }
+            $manifestContent | Out-File $manifestPath -NoNewline -Encoding utf8
         }
-        $pdn = $manifestXml.SelectSingleNode("//PublisherDisplayName")
-        if ($pdn) { $pdn.InnerText = $publisherDisplayName }
-        $manifestXml.Save($manifestPath)
+
         Write-Log " .appxmanifest 替换完成"
     } catch {
         Write-Log "替换 .appxmanifest 失败: $_"
@@ -247,7 +304,7 @@ Invoke-WithLogging $makeappxCmd
 
 # ---------- 8. 签名（可选） ----------
 if ($Env -ieq "Prod") {
-    Write-Log "检测到 Prod 换坏，跳过签名步骤"
+    Write-Log "检测到 Prod 环境，跳过签名步骤"
 } else {
     Write-Log "开始对 Bundle 签名..."
 

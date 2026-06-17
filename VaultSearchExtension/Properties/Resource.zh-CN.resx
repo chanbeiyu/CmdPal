@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="action_open" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="action_open_with" xml:space="preserve">
+    <value>打开方式</value>
+  </data>
+  <data name="action_settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="app_display_title" xml:space="preserve">
+    <value>Vault 搜索</value>
+  </data>
+  <data name="item_no_vault_path_title" xml:space="preserve">
+    <value>Vault 路径未设置</value>
+  </data>
+  <data name="item_no_vault_path_subtitle" xml:space="preserve">
+    <value>按 [ Enter ↵ ] 设置 Vault 位置</value>
+  </data>
+  <data name="page_dynamic_id" xml:space="preserve">
+    <value>vault.search.page.dynamic</value>
+  </data>
+  <data name="page_dynamic_title" xml:space="preserve">
+    <value>搜索 Search</value>
+  </data>
+  <data name="settings_vault_path_description" xml:space="preserve">
+    <value>Vault 路径 - 多个用 [ ; ] 分隔</value>
+  </data>
+  <data name="settings_vault_path_title" xml:space="preserve">
+    <value>Vault 路径</value>
+  </data>
+  <data name="app_display_subtitle" xml:space="preserve">
+    <value>搜索 Vault 中的文件或内容</value>
+  </data>
+  <data name="page_dynamic_name" xml:space="preserve">
+    <value>搜索 Vault</value>
+  </data>
+  <data name="detail_title" xml:space="preserve">
+    <value>摘要</value>
+  </data>
+  <data name="detail_file_tag" xml:space="preserve">
+    <value>标签</value>
+  </data>
+  <data name="detail_file_path" xml:space="preserve">
+    <value>路径</value>
+  </data>
+  <data name="detail_file_size" xml:space="preserve">
+    <value>大小</value>
+  </data>
+  <data name="detail_file_last_modified" xml:space="preserve">
+    <value>最后编辑时间</value>
+  </data>
+  <data name="action_copy_path" xml:space="preserve">
+    <value>拷贝路径</value>
+  </data>
+  <data name="action_copy" xml:space="preserve">
+    <value>拷贝</value>
+  </data>
+  <data name="action_open_in_folder" xml:space="preserve">
+    <value>在资源管理器中打开</value>
+  </data>
+  <data name="settings_index_tags_description" xml:space="preserve">
+    <value>Markdown 文件使用 frontmatter 中的 tags, Txt 文件使用内容中以 # 开始的词组</value>
+  </data>
+  <data name="settings_index_tags_title" xml:space="preserve">
+    <value>标签匹配</value>
+  </data>
+  <data name="settings_index_content_title" xml:space="preserve">
+    <value>内容匹配</value>
+  </data>
+  <data name="settings_index_content_description" xml:space="preserve">
+    <value>匹配文件内容，占用更多内存</value>
+  </data>
+  <data name="settings_show_details_description" xml:space="preserve">
+    <value>自动显示详情面板</value>
+  </data>
+  <data name="settings_show_details_title" xml:space="preserve">
+    <value>详情</value>
+  </data>
+  <data name="item_error_vault_path_title" xml:space="preserve">
+    <value>Vault 路径设置错误</value>
+  </data>
+  <data name="item_error_vault_path_subtitle" xml:space="preserve">
+    <value>按 [ Enter ↵ ] 设置 Vault 位置</value>
+  </data>
+  <data name="item_reload_index_toast" xml:space="preserve">
+    <value>开始重建索引，大概需要几秒</value>
+  </data>
+  <data name="item_reload_index_title" xml:space="preserve">
+    <value>重建索引</value>
+  </data>
+  <data name="item_reload_index_subtitle" xml:space="preserve">
+    <value>按 [ Enter ⏎ ] 重建索引</value>
+  </data>
+  <data name="item_settings_title" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="item_settings_subtitle" xml:space="preserve">
+    <value>按 [ Enter ⏎ ] 去设置</value>
+  </data>
+  <data name="page_dynamic_placeholder" xml:space="preserve">
+    <value>按 [ &gt; ] + [ Space ␣ ] 显示操作列表</value>
+  </data>
+  <data name="constants_command_start" xml:space="preserve">
+    <value>&gt; </value>
+  </data>
+  <data name="settings_obsidian_vault_description" xml:space="preserve">
+    <value>自动加载 Obsidian 的 Vaults</value>
+  </data>
+  <data name="settings_obsidian_vault_title" xml:space="preserve">
+    <value>Obsidian Vault</value>
+  </data>
+  <data name="page_markdown_title" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="page_markdown_subtitle" xml:space="preserve">
+    <value>打开</value>
+  </data>
+  <data name="page_markdown_id" xml:space="preserve">
+    <value>vault.search.page.markdown</value>
+  </data>
+  <data name="page_fallback_id" xml:space="preserve">
+    <value>vault.search.page.fallback</value>
+  </data>
+  <data name="page_fallback_title" xml:space="preserve">
+    <value>搜索 Vaults </value>
+  </data>
+  <data name="page_help_title" xml:space="preserve">
+    <value>帮助</value>
+  </data>
+  <data name="page_help_name" xml:space="preserve">
+    <value>帮助</value>
+  </data>
+  <data name="page_help_id" xml:space="preserve">
+    <value>vault.search.page.help</value>
+  </data>
+  <data name="action_copy_toast" xml:space="preserve">
+    <value>拷贝到剪切板</value>
+  </data>
+  <data name="action_copy_content" xml:space="preserve">
+    <value>拷贝内容</value>
+  </data>
+</root>

@@ -5,8 +5,7 @@ using System.Threading;
 
 namespace CmdPal.VaultSearchExtension.Helpers;
 
-internal sealed partial class TagHelper(string text) : ITag
-{
+internal sealed partial class TagHelper(string text): ITag {
     // 7 组 高对比度配对色：前景 + 背景（循环使用）
     private static readonly List<(OptionalColor Fore, OptionalColor Back)> _tagColors = new()
     {
