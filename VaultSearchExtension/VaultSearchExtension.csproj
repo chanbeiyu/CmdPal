@@ -25,7 +25,7 @@
 	  <NeutralLanguage>zh-Hans</NeutralLanguage>
 	  <AppxPackageIdentityName>chanbeiyu.VaultSearch</AppxPackageIdentityName>
 	  <AppxPackagePublisher>CN=chanbeiyu</AppxPackagePublisher>
-	  <AppxPackageVersion>0.0.1.0</AppxPackageVersion>
+	  <AppxPackageVersion>0.0.1.0</AppxPackageVersion> 
   </PropertyGroup>
 	
   <ItemGroup>
@@ -50,6 +50,15 @@
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
+  <Target Name="SkipCommandPaletteSdkWinmdHarvest"
+          BeforeTargets="_CalculateInputsForGenerateCurrentProjectAppxManifest">
+    <ItemGroup>
+      <PackagingOutputs Update="@(PackagingOutputs)"
+                        Condition="'%(PackagingOutputs.Filename)%(PackagingOutputs.Extension)' == 'Microsoft.CommandPalette.Extensions.winmd'">
+        <SkipHarvestingWinmdRegistration>true</SkipHarvestingWinmdRegistration>
+      </PackagingOutputs>
+    </ItemGroup>
+  </Target>
 
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
@@ -165,3 +174,4 @@
   </PropertyGroup>
 
 </Project>
+ 

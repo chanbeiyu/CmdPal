@@ -304,7 +304,7 @@ Invoke-WithLogging $makeappxCmd
 
 # ---------- 8. 签名（可选） ----------
 if ($Env -ieq "Prod") {
-    Write-Log "检测到 Prod 换坏，跳过签名步骤"
+    Write-Log "检测到 Prod 环境，跳过签名步骤"
 } else {
     Write-Log "开始对 Bundle 签名..."
 
